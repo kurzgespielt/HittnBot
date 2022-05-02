@@ -6,7 +6,7 @@ const dotenv = require('dotenv');
 dotenv.config()
 
 const commands = [
-	new SlashCommandBuilder()
+	/*new SlashCommandBuilder()
 	.setName('server')
 	.setDescription('Replies with server info!'),
 	new SlashCommandBuilder()
@@ -49,10 +49,12 @@ const commands = [
 		.setRequired(true)),
 	new SlashCommandBuilder()
 	.setName('ping')
-	.setDescription('try it out!'),
+	.setDescription('try it out!'),*/
 ]
 	.map(command => command.toJSON());
  
+console.log(commands[1]);
+
 const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN);
 
 rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })

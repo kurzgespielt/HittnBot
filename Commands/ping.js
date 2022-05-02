@@ -1,11 +1,13 @@
-const { CommandInteraction, MessageEmbed} = require("discord.js");
-
+const { MessageActionRow, MessageButton, MessageEmbed, CommandInteraction} = require("discord.js");
+const config = require('../data/config.json');
 
 module.exports = {
-    name: 'ping',
-    description: 'Replies with pong',  
-
-    run: async(client, interaction) => {
+	command : {
+		name: 'ping',
+		description: 'Replies with pong',  
+	},
+	
+    run: async(client, interaction, args) => {
         row = new MessageActionRow()
 				.addComponents(
 				new MessageButton()

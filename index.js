@@ -7,6 +7,11 @@ const { strictEqual } = require('assert');
 const fs = require('fs');
 let users = require('./data/users.json');
 dotenv.config()
+let commands = {
+	ping: require('./Commands/ping'),
+	};
+
+
 
 // Create a new client instance
 const client = new Client({ 
@@ -18,9 +23,12 @@ const client = new Client({
 client.on('ready', () => {
 	console.log('logged in!');
 
-	/*for (const cmd of commands) {
-		
-	}*/
+ 	
+	for(const [key, value] of Object.entries(commands)) {
+		client.application.commands.create(value.command, config.guildId);
+	}
+
+	
 });
 client.on('guildMemberAdd', member => {
 		let embed = new MessageEmbed()
@@ -72,7 +80,7 @@ client.on('guildMemberRemove', member => {
 			.catch(console.error);
 	});
 
-client.on('interactionCreate', async interaction => {
+client.on('interactionCreate', async (interaction, args) => {
 	let embed;
 	let row;
 	if (!interaction.isCommand()) return;
@@ -80,19 +88,8 @@ client.on('interactionCreate', async interaction => {
 		switch(commandName) {
 			case 'ping':
 				interactionLogger(interaction);
-				row = new MessageActionRow()
-				.addComponents(
-				new MessageButton()
-					.setCustomId('ping')
-					.setLabel('ping')
-					.setStyle('PRIMARY'),
-				);
-				embed = new MessageEmbed()
-				.setColor(config['color-hex'])
-				.setTitle('Pong')
-				.setFooter({text: client.user.username+ ' by Lukas#6616', iconURL: config.avatar});
-				await interaction.reply({ephemeral: false,embeds:[embed], components: [row] })
-				.catch(console.error);
+				let ping = commands[commandName].run;
+				ping(client, interaction, args);
 				break;
 			case 'server':
 				interactionLogger(interaction);
@@ -110,7 +107,8 @@ client.on('interactionCreate', async interaction => {
 				.catch(console.error);
 				break;
 			case 'clear':
-				interactionLogger(interaction);
+				commands[commandName].run();
+				/*interactionLogger(interaction);
 				if(interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
 					interaction.channel.bulkDelete(interaction.options.get('count', true).value)
 					.catch(console.error);
@@ -127,7 +125,7 @@ client.on('interactionCreate', async interaction => {
 						.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
 					await interaction.reply({ephemeral: true,embeds:[embed]})
 					.catch(console.error);
-				}
+				}*/
 				break;
 			case 'warn':
 				interactionLogger(interaction);
