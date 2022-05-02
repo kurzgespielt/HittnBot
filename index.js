@@ -5,11 +5,14 @@ const config = require('./data/config.json');
 const {MessageEmbed, MessageActionRow, MessageButton, Permissions} = require('discord.js');
 const { strictEqual } = require('assert');
 const fs = require('fs');
-let users = require('./data/users.json');
 dotenv.config()
 let commands = {
 	ping: require('./Commands/ping'),
+	clear: require('./Commands/clear'),
+	warn: require('./Commands/warn'),
+	server: require('./Commands/server'),
 	};
+const interactionHandler = require('./Eventhandler/interactionHandler');
 
 
 
@@ -39,16 +42,7 @@ client.on('guildMemberAdd', member => {
 						.setFooter({text: client.user.username+ ' by Lukas#6616', iconURL: config.avatar});
 			member.guild.channels.cache.get(config['welcome-channel']).send({embeds: [embed]})
 			.catch(console.error);
-			users[member.user.id]= {
-				'guildId':member.guild.id,
-				'username':member.user.username,
-				'warns':0,
-				'bot': member.user.bot
-			};
-			fs.writeFile('./data/users.json', JSON.stringify(users), err=>{
-				if(err){
-				  console.log("Error writing file" ,err);
-				}});
+			 
 		if(!member.user.bot) {
 			embed = new MessageEmbed()
 						.setTitle(`Verify.`)
@@ -69,7 +63,7 @@ client.on('guildMemberAdd', member => {
 		});
 
 client.on('guildMemberRemove', member => {	
-	console.log('member left');
+	console.log(member);
 	let embed = new MessageEmbed()
 						.setTitle(`${member.user.username} left ${member.guild.name}.`)
 						.setDescription('there are now ' + member.guild.memberCount+ ' members.')
@@ -81,114 +75,24 @@ client.on('guildMemberRemove', member => {
 	});
 
 client.on('interactionCreate', async (interaction, args) => {
-	let embed;
-	let row;
 	if (!interaction.isCommand()) return;
 		const { commandName } = interaction;
 		switch(commandName) {
 			case 'ping':
-				interactionLogger(interaction);
-				let ping = commands[commandName].run;
-				ping(client, interaction, args);
+				interactionHandler.interactionLogger(interaction);
+				commands[commandName].run(client, interaction, args);
 				break;
 			case 'server':
-				interactionLogger(interaction);
-				embed = new MessageEmbed()
-					.setTitle('Server informations')
-					.addFields (
-						{ name: 'Servername', value: `${interaction.guild.name}` },
-						{ name: 'Members', value: `${interaction.guild.memberCount} members` },
-						{ name: 'Creation time', value: `${interaction.guild.createdAt}` },
-						{ name: 'Server description', value: `${interaction.guild.description}` },
-					)
-					.setColor(config['color-hex'])
-					.setFooter({text: client.user.username+ ' by Lukas#6616', iconURL: config.avatar})
-				await interaction.reply({ embeds: [embed] })
-				.catch(console.error);
+				interactionHandler.interactionLogger(interaction);
+				commands[commandName].run(client, interaction, args);
 				break;
 			case 'clear':
-				commands[commandName].run();
-				/*interactionLogger(interaction);
-				if(interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
-					interaction.channel.bulkDelete(interaction.options.get('count', true).value)
-					.catch(console.error);
-					embed = new MessageEmbed()
-						.setColor(config['color-hex'])
-						.setTitle(`Successfully deleted ${interaction.options.get('count', true).value} messages`)
-						.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
-					await interaction.reply({ephemeral: true,embeds:[embed]})
-					.catch(console.error);
-				} else {
-					embed = new MessageEmbed()
-						.setColor(config['color-hex'])
-						.setTitle('This feature is for administrators only')
-						.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
-					await interaction.reply({ephemeral: true,embeds:[embed]})
-					.catch(console.error);
-				}*/
+				interactionHandler.interactionLogger(interaction);
+				commands[commandName].run(client, interaction, args);
 				break;
 			case 'warn':
-				interactionLogger(interaction);
-				const target = interaction.options.getMember("target");
-				const reason = interaction.options.getString("reason");
-				if(interaction.member.permissions.has(Permissions.FLAGS.KICK_MEMBERS)) {
-					if(users[target.id]) {
-						if (users[target.id].warns == 2) {
-							target.kick(reason+' - banned by the bot because of 3 warns');
-							users[target.id] = null;
-							fs.writeFile('./data/users.json', JSON.stringify(users), err=> {
-								if(err){
-								  console.log("Error writing file" ,err);
-								}});
-							embed = new MessageEmbed()
-								.setColor(config['color-hex'])
-								.setTitle('user has been kicked because of 3 warns')
-								.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
-							await interaction.reply({ephemeral: true,embeds:[embed]})
-							embed = new MessageEmbed()
-								.setColor(config['color-hex'])
-								.setTitle(`You have been warned on the server ${interaction.guild.name}.`)
-								.addFields (
-									{name:'reason', description:reason}
-								)
-								.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
-							target.send({ephemeral: true,embeds:[embed]})
-						} else {
-							users[target.id].warns = users[target.id].warns + 1;
-							fs.writeFile('./data/users.json', JSON.stringify(users), err=> {
-								if(err){
-								  console.log("Error writing file" ,err);
-								}});
-							embed = new MessageEmbed()
-								.setColor(config['color-hex'])
-								.setTitle(`user have been warned and now has ${user[target.id].warns} warns.`)
-								.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
-							await interaction.reply({ephemeral: true,embeds:[embed]})
-							embed = new MessageEmbed()
-								.setColor(config['color-hex'])
-								.setTitle(`You have been warned on the server ${interaction.guild.name}.`)
-								.addFields (
-									{name:'reason', description:reason},
-									{name:'Warns', description:`You now have ${user[target.id].warns} warn/s`}
-								)
-								.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
-							target.send({ephemeral: true,embeds:[embed]})
-						}
-					} else {
-						embed = new MessageEmbed()
-								.setColor(config['color-hex'])
-								.setTitle(`ivalid user`)
-								.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
-						await interaction.reply({ephemeral: true,embeds:[embed]})
-					}
-				} else {
-					embed = new MessageEmbed()
-						.setColor(config['color-hex'])
-						.setTitle('You do not have the permissions to perform this command')
-						.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
-					await interaction.reply({ephemeral: true,embeds:[embed]})
-					.catch(console.error);
-				}
+				interactionHandler.interactionLogger(interaction);
+				commands[commandName].run(client, interaction, args);
 			break;
 
 		}
@@ -282,44 +186,7 @@ client.on('interactionCreate', async interaction => {
 	
 });
 
-function interactionLogger(interaction) {
-	let embed;
 
-	if (interaction.isCommand()) {
-		if (interaction.channel) {
-			embed = new MessageEmbed()
-			.setColor(config['color-hex'])
-			.setTitle('Command used.')
-			.setDescription(`Command ${interaction.commandName} used by <@${interaction.user.id}> in channel <#${interaction.channel.id.toString()}>`)
-			.setFooter({text: client.user.username+ ' by Lukas#6616 •', iconURL: config.avatar});
-		} else {
-			embed = new MessageEmbed()
-			.setColor(config['color-hex'])
-			.setTitle('Command used.')
-			.setDescription(`Command ${interaction.commandName} used by <@${interaction.user.id}> in direct messages with <@${interaction.id}>`)
-			.setFooter({text: client.user.username+ ' by Lukas#6616 •', iconURL: config.avatar});
-		}
-		client.channels.cache.get(config['log']).send({embeds: [embed]})
-		.catch(console.error);
-	} else if(interaction.isButton()) {
-		if (interaction.channel) {
-			embed = new MessageEmbed()
-			.setColor(config['color-hex'])
-			.setTitle('Button used.')
-			.setDescription(`Button ${interaction.customId} used by <@${interaction.user.id}> in channel <#${interaction.channel.id.toString()}>`)
-			.setFooter({text: client.user.username+ ' by Lukas#6616', iconURL: config.avatar})
-		} else {
-			embed = new MessageEmbed()
-			.setColor(config['color-hex'])
-			.setTitle('Button used.')
-			.setDescription(`Button ${interaction.customId} used by <@${interaction.user.id}> in direct messages`)
-			.setFooter({text: client.user.username+ ' by Lukas#6616', iconURL: config.avatar})
-		}
-		client.channels.cache.get(config['log']).send({embeds: [embed]})
-		.catch(console.error);
-	}
-	
-}
 
 
 // Login to Discord with your client's token
