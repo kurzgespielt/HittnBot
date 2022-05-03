@@ -13,7 +13,8 @@ let commands = {
 	server: require('./Commands/server'),
 	};
 let buttons = {
-	ping: require('./Buttons/ping')
+	ping: require('./Buttons/ping'),
+	verify: require('./Buttons/verify')
 };
 const interactionHandler = require('./Eventhandler/interactionHandler');
 const channelHandler = require('./Eventhandler/channelHandler');
@@ -139,11 +140,12 @@ client.on('interactionCreate', async (interaction, args) => {
 
 	switch (button) {
 		case 'ping':
-			interactionHandler.interactionLogger(interaction);
+			interactionHandler.interactionLogger(client, interaction, args);
 			buttons[button].run(client, interaction, args);
 			break;
 		case 'verify':
-			interactionHandler.interactionLogger(interaction);
+			interactionHandler.interactionLogger(client, interaction, args);
+			buttons[button].run(client, interaction, args);
 			//console.log(bot.guilds.cache.get(users[interaction.user.id].guildId).members.cache.get(interaction.user.id));
 			//bot.guilds.cache.get(users[interaction.user.id].guildId).members.cache.get(interaction.user.id).roles.add(bot.guilds.cache.get(users[interaction.user.id].guildId).roles.cache.get(config['join-role']));
 			break;
