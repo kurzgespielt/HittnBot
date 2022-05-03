@@ -2,7 +2,7 @@ const {MessageEmbed, MessageActionRow, MessageButton, Permissions} = require('di
 const config = require('../data/config.json');
 
 
-	function interactionLogger(interaction) {
+	function interactionLogger(client,interaction, args) {
 	let embed;
 
 	if (interaction.isCommand()) {
@@ -19,7 +19,7 @@ const config = require('../data/config.json');
 			.setDescription(`Command ${interaction.commandName} used by <@${interaction.user.id}> in direct messages`)
 			.setFooter({text: client.user.username+ ' by Lukas#6616 •', iconURL: config.avatar});
 		}
-		client.channels.cache.get(config['log']).send({embeds: [embed]})
+		client.channels.cache.get(config['interactionlog']).send({embeds: [embed]})
 		.catch(console.error);
 	} else if(interaction.isButton()) {
 		if (interaction.channel) {
@@ -35,7 +35,7 @@ const config = require('../data/config.json');
 			.setDescription(`Button ${interaction.customId} used by <@${interaction.user.id}> in direct messages`)
 			.setFooter({text: client.user.username+ ' by Lukas#6616', iconURL: config.avatar})
 		}
-		client.channels.cache.get(config['log']).send({embeds: [embed]})
+		client.channels.cache.get(config['interactionlog']).send({embeds: [embed]})
 		.catch(console.error);
 	}
 	

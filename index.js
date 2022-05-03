@@ -12,8 +12,11 @@ let commands = {
 	warn: require('./Commands/warn'),
 	server: require('./Commands/server'),
 	};
+let buttons = {
+	ping: require('./Buttons/ping')
+};
 const interactionHandler = require('./Eventhandler/interactionHandler');
-
+const channelHandler = require('./Eventhandler/channelHandler');
 
 
 // Create a new client instance
@@ -79,19 +82,19 @@ client.on('interactionCreate', async (interaction, args) => {
 		const { commandName } = interaction;
 		switch(commandName) {
 			case 'ping':
-				interactionHandler.interactionLogger(interaction);
+				interactionHandler.interactionLogger(client, interaction, args);
 				commands[commandName].run(client, interaction, args);
 				break;
 			case 'server':
-				interactionHandler.interactionLogger(interaction);
+				interactionHandler.interactionLogger(client, interaction, args);
 				commands[commandName].run(client, interaction, args);
 				break;
 			case 'clear':
-				interactionHandler.interactionLogger(interaction);
+				interactionHandler.interactionLogger(client, interaction, args);
 				commands[commandName].run(client, interaction, args);
 				break;
 			case 'warn':
-				interactionHandler.interactionLogger(interaction);
+				interactionHandler.interactionLogger(client, interaction, args);
 				commands[commandName].run(client, interaction, args);
 			break;
 
@@ -109,41 +112,19 @@ client.on('guildBanRemove' , async (ban) => {
 
 
 client.on('channelCreate', channel => {
-	embed = new MessageEmbed()
-			.setColor(config['color-hex'])
-			.setTitle('Channel update.')
-			.setDescription(`Channel <#${channel.id}> has been created.`)
-			.setFooter({text: client.user.username+ ' by Lukas#6616 •', iconURL: config.avatar});
-	client.channels.cache.get(config['log']).send({embeds: [embed]})
-	.catch(console.error);
+	channelHandler.channelHandler(client, 'create', channel);
 })
 
 client.on('channelDelete', channel => {
-	embed = new MessageEmbed()
-			.setColor(config['color-hex'])
-			.setTitle('Channel update.')
-			.setDescription(`Channel ${channel.name} has been deleted.`)
-			.setFooter({text: client.user.username+ ' by Lukas#6616 •', iconURL: config.avatar});
-	client.channels.cache.get(config['log']).send({embeds: [embed]})
-	.catch(console.error);
+	channelHandler.channelHandler(client, 'delete', channel);
 })
 
 client.on('channelUpdate', (oldchannel, newchannel) => {
-	embed = new MessageEmbed()
-			.setColor(config['color-hex'])
-			.setTitle('Channel update.')
-			.setDescription(`Channel <#${newchannel.id}> has been updated.`)
-			.setFooter({text: client.user.username+ ' by Lukas#6616 •', iconURL: config.avatar});
-	client.channels.cache.get(config['log']).send({embeds: [embed]})
-	.catch(console.error);
+	channelHandler.channelHandler(client, 'update', newchannel);
 })
 
-client.on('interactionCreate', async interaction => {
-	let embed;
-	let row;
-	let commandInteraction;
+client.on('interactionCreate', async (interaction, args) => {
 	if (!interaction.isButton()) return; 
-
 	/*if(interaction.isCommand()) commandInteraction = interaction.user.id;
 	console.log(commandInteraction);
 	if(interaction.user.id != commandInteraction) {
@@ -158,28 +139,13 @@ client.on('interactionCreate', async interaction => {
 
 	switch (button) {
 		case 'ping':
-			interactionLogger(interaction);
-			row = new MessageActionRow()
-			.addComponents(
-			new MessageButton()
-				.setCustomId('ping')
-				.setLabel('ping')
-				.setStyle('PRIMARY'),
-			);
-			embed = new MessageEmbed()
-			.setColor(config['color-hex'])
-			.setTitle('Pong')
-			.setFooter({text: client.user.username+' by Lukas#6616', iconURL: config.avatar});
-			await interaction.reply({ephemeral: false,embeds:[embed], components: [row] })
-			.catch(console.error);
+			interactionHandler.interactionLogger(interaction);
+			buttons[button].run(client, interaction, args);
 			break;
 		case 'verify':
-			interactionLogger(interaction);
-			console.log(client.guilds.cache.get(users[interaction.user.id].guildId).members.fetch(interaction.user.id))
+			interactionHandler.interactionLogger(interaction);
 			//console.log(bot.guilds.cache.get(users[interaction.user.id].guildId).members.cache.get(interaction.user.id));
 			//bot.guilds.cache.get(users[interaction.user.id].guildId).members.cache.get(interaction.user.id).roles.add(bot.guilds.cache.get(users[interaction.user.id].guildId).roles.cache.get(config['join-role']));
-			client.guilds.cache.get(users[interaction.user.id].guildId).members.fetch(interaction.user.id).roles.add(client.guilds.cache.get(users[interaction.user.id].guildId).roles.cache.get(config['join-role']))
-			.catch(console.error);
 			break;
 	}
 

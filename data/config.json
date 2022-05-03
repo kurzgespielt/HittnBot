@@ -1,12 +1,12 @@
 {
     "clientId": "968423077979488297",
     "guildId": "968421707880751166",    
-    "prefix": "!",
     "color-hex":"#FAFA0F",
     "botname": "Hittnbot",
     "welcome-channel": "968421708451172384",
     "leave-channel": "969538371842084874",
-    "log": "969957192029577246",
+    "interactionlog": "969957192029577246",
+    "channellog": "970596753416028160",
     "join-role": "968450870201180201",
     "avatar": "https://i.imgur.com/hfZ5Sp1.png"
 }
