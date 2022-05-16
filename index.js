@@ -11,6 +11,7 @@ let commands = {
 	clear: require('./Commands/clear'),
 	warn: require('./Commands/warn'),
 	server: require('./Commands/server'),
+	verify: require('./Commands/verify'),
 	};
 let buttons = {
 	ping: require('./Buttons/ping'),
@@ -46,24 +47,6 @@ client.on('guildMemberAdd', member => {
 						.setFooter({text: client.user.username+ ' by Lukas#6616', iconURL: config.avatar});
 			member.guild.channels.cache.get(config['welcome-channel']).send({embeds: [embed]})
 			.catch(console.error);
-			 
-		if(!member.user.bot) {
-			embed = new MessageEmbed()
-						.setTitle(`Verify.`)
-						.setDescription(`Hey ${member.user}!:hand_splayed:\n Thanks for joining ${member.guild.name}!:flame:\nPlease verify that you are not a bot by pressing the "Verify"-Button.`)
-						.setImage(member.user.avatarURL)
-						.setColor(config['color-hex'])
-						.setFooter({text: client.user.username+ ' by Lukas#6616', iconURL: config.avatar});
-			row = new MessageActionRow()
-						.addComponents(
-						new MessageButton()
-							.setCustomId('verify')
-							.setLabel('Verify')
-							.setStyle('SUCCESS'),);
-			member.send({embeds: [embed], components: [row]})
-			.catch(console.error);
-		}
-		
 		});
 
 client.on('guildMemberRemove', member => {	
@@ -94,6 +77,9 @@ client.on('interactionCreate', async (interaction, args) => {
 				interactionHandler.interactionLogger(client, interaction, args);
 				commands[commandName].run(client, interaction, args);
 				break;
+			case 'warn':
+				interactionHandler.interactionLogger(client, interaction, args);
+				commands[commandName].run(client, interaction, args);
 			case 'warn':
 				interactionHandler.interactionLogger(client, interaction, args);
 				commands[commandName].run(client, interaction, args);
