@@ -35,7 +35,6 @@ client.on('ready', () => {
 	for(const [key, value] of Object.entries(commands)) {
 		client.application.commands.create(value.command, config.guildId);
 	}
-
 	
 });
 client.on('guildMemberAdd', member => {
@@ -80,7 +79,7 @@ client.on('interactionCreate', async (interaction, args) => {
 			case 'warn':
 				interactionHandler.interactionLogger(client, interaction, args);
 				commands[commandName].run(client, interaction, args);
-			case 'warn':
+			case 'verify':
 				interactionHandler.interactionLogger(client, interaction, args);
 				commands[commandName].run(client, interaction, args);
 			break;

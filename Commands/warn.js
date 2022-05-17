@@ -31,6 +31,7 @@ module.exports = {
         let role;
         if(interaction.member.permissions.has(Permissions.FLAGS.KICK_MEMBERS)) {
             if(target) {
+                console.log(target);
                 if (target.roles.cache.has(warn2)) {
                     embed = new MessageEmbed()
                         .setColor(config['color-hex'])
