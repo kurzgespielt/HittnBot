@@ -1,25 +1,22 @@
 // Require the necessary discord.js classes
-const { Client, Intents, MessageSelectMenu } = require('discord.js');
+const { Client, Intents, MessageSelectMenu, MessageEmbed} = require('discord.js');
 const dotenv = require('dotenv');
 const config = require('./data/config.json');
-const {MessageEmbed, MessageActionRow, MessageButton, Permissions} = require('discord.js');
-const { strictEqual } = require('assert');
 const fs = require('fs');
-dotenv.config()
-let commands = {
-	ping: require('./Commands/ping'),
-	clear: require('./Commands/clear'),
-	warn: require('./Commands/warn'),
-	server: require('./Commands/server'),
-	verify: require('./Commands/verify'),
-	};
-let buttons = {
-	ping: require('./Buttons/ping'),
-	verify: require('./Buttons/verify')
-};
+let commands = fs.readdirSync('./commands');
+let buttons = fs.readdirSync('./buttons');
 const interactionHandler = require('./Eventhandler/interactionHandler');
 const channelHandler = require('./Eventhandler/channelHandler');
+dotenv.config();
 
+let jsonCommands = {};
+for (const element of commands) {
+	jsonCommands[element.split('.')[0]] = require('./commands/'+element);
+}
+let jsonButtons = {};
+for (const element of buttons) {
+	jsonButtons[element.split('.')[0]] = require('./buttons/'+element);
+}
 
 // Create a new client instance
 const client = new Client({ 
@@ -29,10 +26,8 @@ const client = new Client({
 
 // When the client is ready, run this code (only once)
 client.on('ready', () => {
-	console.log('logged in!');
-
- 	
-	for(const [key, value] of Object.entries(commands)) {
+	console.log('logged in!'); 	
+	for(const [key,value] of Object.entries(jsonCommands)) {
 		client.application.commands.create(value.command, config.guildId);
 	}
 	
@@ -66,22 +61,22 @@ client.on('interactionCreate', async (interaction, args) => {
 		switch(commandName) {
 			case 'ping':
 				interactionHandler.interactionLogger(client, interaction, args);
-				commands[commandName].run(client, interaction, args);
+				jsonCommands[commandName].run(client, interaction, args);
 				break;
 			case 'server':
 				interactionHandler.interactionLogger(client, interaction, args);
-				commands[commandName].run(client, interaction, args);
+				jsonCommands[commandName].run(client, interaction, args);
 				break;
 			case 'clear':
 				interactionHandler.interactionLogger(client, interaction, args);
-				commands[commandName].run(client, interaction, args);
+				jsonCommands[commandName].run(client, interaction, args);
 				break;
 			case 'warn':
 				interactionHandler.interactionLogger(client, interaction, args);
-				commands[commandName].run(client, interaction, args);
+				jsonCommands[commandName].run(client, interaction, args);
 			case 'verify':
 				interactionHandler.interactionLogger(client, interaction, args);
-				commands[commandName].run(client, interaction, args);
+				jsonCommands[commandName].run(client, interaction, args);
 			break;
 
 		}
@@ -98,15 +93,15 @@ client.on('guildBanRemove' , async (ban) => {
 
 
 client.on('channelCreate', channel => {
-	channelHandler.channelHandler(client, 'create', channel);
+	channelHandler.channelHandler(client, 'create', null, channel);
 })
 
 client.on('channelDelete', channel => {
-	channelHandler.channelHandler(client, 'delete', channel);
+	channelHandler.channelHandler(client, 'delete', null, channel);
 })
 
 client.on('channelUpdate', (oldchannel, newchannel) => {
-	channelHandler.channelHandler(client, 'update', newchannel);
+	channelHandler.channelHandler(client, 'update', oldchannel, newchannel);
 })
 
 client.on('interactionCreate', async (interaction, args) => {
@@ -131,8 +126,6 @@ client.on('interactionCreate', async (interaction, args) => {
 		case 'verify':
 			interactionHandler.interactionLogger(client, interaction, args);
 			buttons[button].run(client, interaction, args);
-			//console.log(bot.guilds.cache.get(users[interaction.user.id].guildId).members.cache.get(interaction.user.id));
-			//bot.guilds.cache.get(users[interaction.user.id].guildId).members.cache.get(interaction.user.id).roles.add(bot.guilds.cache.get(users[interaction.user.id].guildId).roles.cache.get(config['join-role']));
 			break;
 	}
 

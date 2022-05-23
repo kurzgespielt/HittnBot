@@ -1,7 +1,7 @@
 const {MessageEmbed, MessageActionRow, MessageButton, Permissions} = require('discord.js');
 const config = require('../data/config.json');
 
-	function channelHandler(client, action, channel) {
+	function channelHandler(client, action, oldchannel, channel) {
 		switch(action.toLowerCase()) {
 			case 'create':
 				embed = new MessageEmbed()
