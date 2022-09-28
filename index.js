@@ -3,19 +3,21 @@ const { Client, Intents, MessageSelectMenu, MessageEmbed} = require('discord.js'
 const dotenv = require('dotenv');
 const config = require('./data/config.json');
 const fs = require('fs');
-let commands = fs.readdirSync('./commands');
-let buttons = fs.readdirSync('./buttons');
+
+
+let commands = fs.readdirSync('./Commands');
+let buttons = fs.readdirSync('./Buttons');
 const interactionHandler = require('./Eventhandler/interactionHandler');
 const channelHandler = require('./Eventhandler/channelHandler');
 dotenv.config();
 
 let jsonCommands = {};
 for (const element of commands) {
-	jsonCommands[element.split('.')[0]] = require('./commands/'+element);
+	jsonCommands[element.split('.')[0]] = require('./Commands/'+element);
 }
 let jsonButtons = {};
 for (const element of buttons) {
-	jsonButtons[element.split('.')[0]] = require('./buttons/'+element);
+	jsonButtons[element.split('.')[0]] = require('./Buttons/'+element);
 }
 
 // Create a new client instance

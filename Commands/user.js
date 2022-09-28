@@ -4,8 +4,17 @@ const config = require('../data/config.json');
 module.exports = {
 	command : {
 		name: 'user',
-		description: 'Replies with user info',  
+		description: 'Replies with user info', 
+		options: [
+            {
+                name: 'user',
+                description: 'User to get info from',
+                type: 'USER',
+                required: false
+            }
+        ]  
 	},
+
 	
     run: async(client, interaction, args) => {
         row = new MessageActionRow()
